@@ -11,6 +11,11 @@ define csit::installscript(
                           ) {
   include ::csit
 
+  if($source==undef and $content==undef)
+  {
+    fail("csit::installscript(${pkgname}): either source or content must be defined")
+  }
+
   file { "${::csit::srcdir}/installscript-${pkgname}":
     ensure  => $ensure,
     owner   => $owner,
@@ -31,4 +36,9 @@ define csit::installscript(
       tag     => "installscript-${pkgname}",
     }
   }
+
+  Exec <| tag == "preinstallscript-${pkgname}" |> ->
+  Exec <| tag == "installscript-${pkgname}" |> ->
+  Exec <| tag == "postinstallscript-${pkgname}" |> ->
+  Exec <| tag == "service-${pkgname}" |>
 }
